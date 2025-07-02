@@ -1,0 +1,268 @@
+openapi: 3.0.0
+info:
+  title: Blog Personal API
+  version: 1.0.0
+  description: API REST para un blog personal
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+
+paths:
+  /:
+    get:
+      summary: Información de la API
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  version:
+                    type: string
+
+  /api/posts:
+    get:
+      summary: Obtener posts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Número de página
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Posts por página
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filtrar por categoría
+      responses:
+        200:
+          description: Lista de posts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+
+  /api/posts/{slug}:
+    get:
+      summary: Obtener post por slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Post encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Post'
+        404:
+          description: Post no encontrado
+
+  /api/posts/search:
+    get:
+      summary: Buscar posts
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+          description: Término de búsqueda
+      responses:
+        200:
+          description: Resultados de búsqueda
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Post'
+
+  /api/categories:
+    get:
+      summary: Obtener categorías
+      responses:
+        200:
+          description: Lista de categorías
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+
+  /api/categories/{slug}:
+    get:
+      summary: Obtener categoría por slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Categoría encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Category'
+
+  /api/comments:
+    post:
+      summary: Crear comentario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - post_id
+                - content
+                - author_name
+                - author_email
+              properties:
+                post_id:
+                  type: integer
+                content:
+                  type: string
+                author_name:
+                  type: string
+                author_email:
+                  type: string
+                  format: email
+      responses:
+        201:
+          description: Comentario creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /api/comments/post/{post_id}:
+    get:
+      summary: Obtener comentarios de un post
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Comentarios del post
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        view_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        category_name:
+          type: string
+        author_name:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+        post_count:
+          type: integer
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        author_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time 

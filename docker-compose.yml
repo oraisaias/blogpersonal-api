@@ -12,9 +12,22 @@ services:
     depends_on:
       - postgres
 
-  postgres: 
+  dotnet-api:
+    build: ./DotnetDockerApi  # Ajusta según la ruta donde tengas el Dockerfile .NET
+    ports:
+      - "5000:8080"  # .NET escucha en el puerto 80 por default
+    environment:
+      PGUSER: admin
+      PGPASSWORD: secret
+      PGHOST: postgres
+      PGDATABASE: mydb
+      PGPORT: 5432
+    depends_on:
+      - postgres
+
+  postgres:
     image: postgres
-    ports: 
+    ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: admin

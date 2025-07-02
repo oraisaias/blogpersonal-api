@@ -1,6 +1,8 @@
 const express = require('express');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 const cors = require('./middleware/cors');
 const { connectDB } = require('./config/database');
 
@@ -8,6 +10,9 @@ const { connectDB } = require('./config/database');
 const postsRoutes = require('./routes/posts');
 const categoriesRoutes = require('./routes/categories');
 const commentsRoutes = require('./routes/comments');
+
+// Cargar documentación Swagger
+const swaggerDocument = YAML.load('./docs/swagger.yaml');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -36,17 +41,16 @@ app.use(cors);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Documentación Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({
     success: true,
     message: '🚀 API del Blog Personal funcionando correctamente',
     version: '1.0.0',
-    endpoints: {
-      posts: '/api/posts',
-      categories: '/api/categories',
-      comments: '/api/comments'
-    }
+    documentation: '/api-docs'
   });
 });
 
@@ -60,7 +64,8 @@ app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
     message: 'Ruta no encontrada',
-    path: req.originalUrl
+    path: req.originalUrl,
+    documentation: '/api-docs'
   });
 });
 
@@ -84,13 +89,5 @@ app.use((error, req, res, next) => {
 // Iniciar servidor
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
-  console.log(`📚 API del Blog Personal v1.0.0`);
-  console.log(`🔗 Endpoints disponibles:`);
-  console.log(`   - GET  /api/posts`);
-  console.log(`   - GET  /api/posts/:slug`);
-  console.log(`   - GET  /api/posts/search?q=term`);
-  console.log(`   - GET  /api/categories`);
-  console.log(`   - GET  /api/categories/:slug`);
-  console.log(`   - POST /api/comments`);
-  console.log(`   - GET  /api/comments/post/:post_id`);
+  console.log(`📖 Documentación: http://localhost:${port}/api-docs`);
 });

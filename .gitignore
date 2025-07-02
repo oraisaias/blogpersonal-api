@@ -1,2 +1,5 @@
 /volumenes-docker 
 /API/node_modules
+/DotnetDockerApi/bin/
+/DotnetDockerApi/obj/
+
